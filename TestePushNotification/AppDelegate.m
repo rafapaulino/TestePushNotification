@@ -10,11 +10,55 @@
 
 @implementation AppDelegate
 
+
+//metodo acionado quando o aplicativo abre
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    //perguntar para o usuario se ele deseja receber push notification
+    //pedir para registrar o token do aparelho no servidor da apple
+    [application registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
+    //=============================================================================================================
+    
+    //quando a plicacao estiver fechada e for aberta por um push notification, captamos o dicionario (dados) do push por aqui
+    NSDictionary *pushInfo =[launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+     
+    if (pushInfo != nil)
+    {
+        //se tiver alguma coisa dentro desse dicionario significa que o app foi aberto por um push notification
+        UIAlertView *alerta = [[UIAlertView alloc] initWithTitle:@"Acordei por causa de push notification" message:[pushInfo description] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alerta show];
+    }
+    else
+    {
+        //abriu novamente
+    }
+            
+    
     // Override point for customization after application launch.
     return YES;
 }
+
+//metodo acionado caso o usuario tenha aceitado receber PushNoticication e o seu token já estiver cadastrado no servidor da apple
+-(void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+    //acessa un php do nosso servidor para salvar o token do usuario no nosso banco
+    NSLog(@"Aceitou e já está registrado o token: %@", deviceToken);
+}
+
+//meotodo acionado quando o usuario aceita receber pn, porem o cadastro no servidor da apple falhou
+-(void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+   //aqui neste ponto pedimos paratentar registrar jnovamente o token do usuaario no banco da apple
+    NSLog(@"falhou");
+}
+
+
+//metodo acionado quando recebemos um push notification e o nosso app estaaberto ou em background
+-(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    NSLog(@"Recebi um push");
+}
+
 							
 - (void)applicationWillResignActive:(UIApplication *)application
 {
@@ -33,8 +77,15 @@
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
 }
 
+
+///metodo acionado quando o app fica ativo e quando o app abre e quando o volta do background
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
+    //retirando a label vermelha do ícone do aparelho
+    application.applicationIconBadgeNumber = 0;
+    
+    application.applicationIconBadgeNumber = application.applicationIconBadgeNumber+1;
+    
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 }
 
